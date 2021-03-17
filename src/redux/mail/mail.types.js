@@ -1,0 +1,5 @@
+export  const MailActionTypes = {
+    OPEN_SEND_MAIL: 'OPEN_SEND_MAIL',
+    CLOSE_SEND_MAIL: 'CLOSE_SEND_MAIL',
+    FETCH_SELECTED_MAIL: 'FETCH_SELCTED_MAIL'
+}

@@ -1,25 +1,64 @@
-import logo from './logo.svg';
+import React,{useEffect} from 'react';
+
+import { connect } from 'react-redux';
+import {useDispatch} from 'react-redux';
+import {  Switch, Route } from 'react-router-dom';
+
+
+import Header from './components/Header/Header.js';
+import Sidebar from './components/Sidebar/Sidebar.js';
+import Mail from './components/Mail/Mail.js';
+import EmailList from './components/EmailList/EmailList.js';
+import SendMail from './components/SendMail/SendMail.js';
+import Login from './components/Login/Login.js';
+
+import {loginUser} from './redux/user/user.actions'
+import {selectSendMailIsOpen} from './redux/mail/mail.selectors'
+import {selectCurrentUser} from './redux/user/user.selectors';
+
 import './App.css';
+import { auth } from './firebase/firebase.utils.js';
 
-function App() {
+function App({sendMailIsOpen, currentUser}) {
+const dispatch = useDispatch( );
+  useEffect ( ( ) =>{
+    auth.onAuthStateChanged(user =>{
+       if(user) {
+         dispatch(loginUser({
+          displayName: user.displayName,
+          email: user.email,
+          photoUrl: user.photoURL
+         })
+         );
+       }
+    })
+   }, [ ])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    <Route>
+      {currentUser? (
+      <div className="app">
+      <Header />
+      <div className='app_body'> 
+        <Sidebar />
+       <Switch>
+        <Route exact path='/' component={ EmailList } />
+        <Route path='/mail' component={ Mail  } />
+       </Switch>
+       </div>
+     {sendMailIsOpen&&<SendMail />}
+     </div>
+      ) : (
+       <Login />
+      )}
+    </Route>
+    );
+ }
 
-export default App;
+
+
+const mapStateToprops = ( state ) => ({
+  sendMailIsOpen: selectSendMailIsOpen(state),
+  currentUser: selectCurrentUser
+})
+
+export default connect(mapStateToprops)(App);
